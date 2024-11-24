@@ -1,0 +1,337 @@
+basePath: /
+definitions:
+  models.BalanceResponse:
+    properties:
+      balance:
+        additionalProperties:
+          type: number
+        type: object
+    type: object
+  models.DepositRequest:
+    properties:
+      amount:
+        type: number
+      currency:
+        type: string
+    required:
+    - amount
+    - currency
+    type: object
+  models.DepositResponse:
+    properties:
+      message:
+        type: string
+      new_balance:
+        type: number
+    type: object
+  models.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  models.ExchangeRequest:
+    properties:
+      amount:
+        type: number
+      from_currency:
+        type: string
+      to_currency:
+        type: string
+    required:
+    - amount
+    - from_currency
+    - to_currency
+    type: object
+  models.ExchangeResponse:
+    properties:
+      exchanged_amount:
+        type: number
+      message:
+        type: string
+      new_balance:
+        additionalProperties:
+          type: number
+        type: object
+    type: object
+  models.LoginRequest:
+    properties:
+      password:
+        example: password123
+        type: string
+      username:
+        example: user123
+        type: string
+    type: object
+  models.LoginResponse:
+    properties:
+      token:
+        example: JWT_TOKEN
+        type: string
+    type: object
+  models.RatesResponse:
+    properties:
+      EUR:
+        type: number
+      RUB:
+        type: number
+      USD:
+        type: number
+      rates:
+        additionalProperties:
+          type: number
+        type: object
+    type: object
+  models.RegisterRequest:
+    properties:
+      email:
+        description: Электронная почта
+        type: string
+      password:
+        description: Пароль
+        minLength: 6
+        type: string
+      username:
+        description: Логин пользователя
+        minLength: 3
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+  models.RegisterResponse:
+    properties:
+      message:
+        description: Сообщение об успешной регистрации
+        type: string
+      user_id:
+        description: Идентификатор нового пользователя
+        type: integer
+    type: object
+  models.WithdrawRequest:
+    properties:
+      amount:
+        type: number
+      currency:
+        type: string
+    required:
+    - amount
+    - currency
+    type: object
+  models.WithdrawResponse:
+    properties:
+      message:
+        type: string
+      new_balance:
+        type: number
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API for managing currency wallets and transactions
+  termsOfService: https://example.com
+  title: Currency wallet API
+  version: "1.0"
+paths:
+  /api/v1/login:
+    post:
+      consumes:
+      - application/json
+      description: Авторизация пользователя с возвратом JWT-токена для дальнейших
+        запросов
+      parameters:
+      - description: User credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.LoginResponse'
+        "401":
+          description: Invalid username or password
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Авторизация пользователя
+      tags:
+      - Users
+  /api/v1/register:
+    post:
+      consumes:
+      - application/json
+      description: Создает нового пользователя с предоставленными данными
+      parameters:
+      - description: Registration data
+        in: body
+        name: register
+        required: true
+        schema:
+          $ref: '#/definitions/models.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.RegisterResponse'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Register new user
+      tags:
+      - auth
+  /wallet/balance:
+    get:
+      consumes:
+      - application/json
+      description: Получает текущий баланс пользователя.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.BalanceResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Get user balance
+      tags:
+      - wallet
+  /wallet/deposit:
+    post:
+      consumes:
+      - application/json
+      description: Пополняет баланс пользователя на указанную сумму.
+      parameters:
+      - description: Deposit request
+        in: body
+        name: deposit
+        required: true
+        schema:
+          $ref: '#/definitions/models.DepositRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.DepositResponse'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Deposit funds to user balance
+      tags:
+      - wallet
+  /wallet/exchange:
+    post:
+      consumes:
+      - application/json
+      description: Обменивает одну валюту на другую по актуальному курсу.
+      parameters:
+      - description: Exchange request
+        in: body
+        name: exchange
+        required: true
+        schema:
+          $ref: '#/definitions/models.ExchangeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ExchangeResponse'
+        "400":
+          description: Insufficient funds or invalid currencies
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Exchange currency
+      tags:
+      - exchange
+  /wallet/rates:
+    get:
+      consumes:
+      - application/json
+      description: Получает актуальные курсы валют для различных валютных пар.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.RatesResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Get exchange rates
+      tags:
+      - exchange
+  /wallet/withdraw:
+    post:
+      consumes:
+      - application/json
+      description: Выводит указанную сумму со счета пользователя.
+      parameters:
+      - description: Withdraw request
+        in: body
+        name: withdraw
+        required: true
+        schema:
+          $ref: '#/definitions/models.WithdrawRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.WithdrawResponse'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Withdraw funds from user balance
+      tags:
+      - wallet
+swagger: "2.0"
