@@ -129,10 +129,34 @@ host: localhost:8080
 info:
   contact: {}
   description: API for managing currency wallets and transactions
-  termsOfService: https://example.com
   title: Currency wallet API
   version: "1.0"
 paths:
+  /api/v1/balance:
+    get:
+      consumes:
+      - application/json
+      description: Получает текущий баланс пользователя.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.BalanceResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get user balance
+      tags:
+      - wallet
   /api/v1/login:
     post:
       consumes:
@@ -190,30 +214,7 @@ paths:
       summary: Register new user
       tags:
       - auth
-  /wallet/balance:
-    get:
-      consumes:
-      - application/json
-      description: Получает текущий баланс пользователя.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.BalanceResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      summary: Get user balance
-      tags:
-      - wallet
-  /wallet/deposit:
+  /api/v1/wallet/deposit:
     post:
       consumes:
       - application/json
@@ -244,10 +245,12 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Deposit funds to user balance
       tags:
       - wallet
-  /wallet/exchange:
+  /api/v1/wallet/exchange:
     post:
       consumes:
       - application/json
@@ -278,10 +281,12 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Exchange currency
       tags:
       - exchange
-  /wallet/rates:
+  /api/v1/wallet/rates:
     get:
       consumes:
       - application/json
@@ -300,7 +305,7 @@ paths:
       summary: Get exchange rates
       tags:
       - exchange
-  /wallet/withdraw:
+  /api/v1/wallet/withdraw:
     post:
       consumes:
       - application/json
@@ -331,7 +336,14 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Withdraw funds from user balance
       tags:
       - wallet
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

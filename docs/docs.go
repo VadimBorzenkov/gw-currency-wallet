@@ -9,13 +9,52 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "termsOfService": "https://example.com",
         "contact": {},
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/balance": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Получает текущий баланс пользователя.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "wallet"
+                ],
+                "summary": "Get user balance",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.BalanceResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/login": {
             "post": {
                 "description": "Авторизация пользователя с возвратом JWT-токена для дальнейших запросов",
@@ -102,43 +141,13 @@ const docTemplate = `{
                 }
             }
         },
-        "/wallet/balance": {
-            "get": {
-                "description": "Получает текущий баланс пользователя.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "wallet"
-                ],
-                "summary": "Get user balance",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.BalanceResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/wallet/deposit": {
+        "/api/v1/wallet/deposit": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Пополняет баланс пользователя на указанную сумму.",
                 "consumes": [
                     "application/json"
@@ -189,8 +198,13 @@ const docTemplate = `{
                 }
             }
         },
-        "/wallet/exchange": {
+        "/api/v1/wallet/exchange": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Обменивает одну валюту на другую по актуальному курсу.",
                 "consumes": [
                     "application/json"
@@ -241,7 +255,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/wallet/rates": {
+        "/api/v1/wallet/rates": {
             "get": {
                 "description": "Получает актуальные курсы валют для различных валютных пар.",
                 "consumes": [
@@ -270,8 +284,13 @@ const docTemplate = `{
                 }
             }
         },
-        "/wallet/withdraw": {
+        "/api/v1/wallet/withdraw": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Выводит указанную сумму со счета пользователя.",
                 "consumes": [
                     "application/json"
@@ -509,6 +528,13 @@ const docTemplate = `{
                     "type": "number"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`

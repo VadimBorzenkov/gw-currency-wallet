@@ -26,11 +26,13 @@ func extractUserIDFromToken(c *fiber.Ctx) (uint64, error) {
 // @Success 200 {object} models.BalanceResponse
 // @Failure 401 {object} models.ErrorResponse "Unauthorized"
 // @Failure 500 {object} models.ErrorResponse "Internal Server Error"
-// @Router /wallet/balance [get]
+// @Security     BearerAuth
+// @Router /api/v1/balance [get]
 func (h *handler) GetBalance(ctx *fiber.Ctx) error {
 	// Извлекаем ID пользователя из токена
 	userID, err := extractUserIDFromToken(ctx)
 	if err != nil {
+		h.logger.Errorf("Unauthorized")
 		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error": "Unauthorized",
 		})
@@ -39,6 +41,7 @@ func (h *handler) GetBalance(ctx *fiber.Ctx) error {
 	// Получаем баланс пользователя
 	balance, err := h.service.GetBalance(userID)
 	if err != nil {
+		h.logger.Errorf("Failed to get balance")
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to get balance",
 		})
@@ -61,10 +64,12 @@ func (h *handler) GetBalance(ctx *fiber.Ctx) error {
 // @Failure 400 {object} models.ErrorResponse "Invalid input"
 // @Failure 401 {object} models.ErrorResponse "Unauthorized"
 // @Failure 500 {object} models.ErrorResponse "Internal Server Error"
-// @Router /wallet/deposit [post]
+// @Security     BearerAuth
+// @Router /api/v1/wallet/deposit [post]
 func (h *handler) Deposit(ctx *fiber.Ctx) error {
 	var deposit models.DepositRequest
 	if err := ctx.BodyParser(&deposit); err != nil {
+		h.logger.Errorf("Invalid input")
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid input",
 		})
@@ -73,6 +78,7 @@ func (h *handler) Deposit(ctx *fiber.Ctx) error {
 	// Извлекаем ID пользователя из токена
 	userID, err := extractUserIDFromToken(ctx)
 	if err != nil {
+		h.logger.Errorf("Unauthorized")
 		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error": "Unauthorized",
 		})
@@ -81,6 +87,7 @@ func (h *handler) Deposit(ctx *fiber.Ctx) error {
 	// Пополнение счета
 	newBalance, err := h.service.Deposit(userID, deposit.Amount, deposit.Currency)
 	if err != nil {
+		h.logger.Errorf("Invalid amount or currency")
 		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error": "Invalid amount or currency",
 		})
@@ -103,10 +110,12 @@ func (h *handler) Deposit(ctx *fiber.Ctx) error {
 // @Failure 400 {object} models.ErrorResponse "Invalid input"
 // @Failure 401 {object} models.ErrorResponse "Unauthorized"
 // @Failure 500 {object} models.ErrorResponse "Internal Server Error"
-// @Router /wallet/withdraw [post]
+// @Security     BearerAuth
+// @Router /api/v1/wallet/withdraw [post]
 func (h *handler) Withdraw(ctx *fiber.Ctx) error {
 	var withdraw models.WithdrawRequest
 	if err := ctx.BodyParser(&withdraw); err != nil {
+		h.logger.Errorf("Invalid input")
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid input",
 		})
@@ -115,6 +124,7 @@ func (h *handler) Withdraw(ctx *fiber.Ctx) error {
 	// Извлекаем ID пользователя из токена
 	userID, err := extractUserIDFromToken(ctx)
 	if err != nil {
+		h.logger.Errorf("Unauthorized")
 		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error": "Unauthorized",
 		})
@@ -123,6 +133,7 @@ func (h *handler) Withdraw(ctx *fiber.Ctx) error {
 	// Вывод средств
 	newBalance, err := h.service.Withdraw(userID, withdraw.Amount, withdraw.Currency)
 	if err != nil {
+		h.logger.Errorf("Insufficient funds or invalid amount")
 		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error": "Insufficient funds or invalid amount",
 		})
@@ -142,10 +153,11 @@ func (h *handler) Withdraw(ctx *fiber.Ctx) error {
 // @Produce json
 // @Success 200 {object} models.RatesResponse
 // @Failure 500 {object} models.ErrorResponse "Internal Server Error"
-// @Router /wallet/rates [get]
+// @Router /api/v1/wallet/rates [get]
 func (h *handler) GetExchangeRates(ctx *fiber.Ctx) error {
 	rates, err := h.service.GetAllRates()
 	if err != nil {
+		h.logger.Errorf("Failed to retrieve exchange rates")
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to retrieve exchange rates",
 		})
@@ -170,12 +182,14 @@ func (h *handler) GetExchangeRates(ctx *fiber.Ctx) error {
 // @Failure 400 {object} models.ErrorResponse "Insufficient funds or invalid currencies"
 // @Failure 401 {object} models.ErrorResponse "Unauthorized"
 // @Failure 500 {object} models.ErrorResponse "Internal Server Error"
-// @Router /wallet/exchange [post]
+// @Security     BearerAuth
+// @Router /api/v1/wallet/exchange [post]
 func (h *handler) ExchangeCurrency(ctx *fiber.Ctx) error {
 	var exchangeRequest models.ExchangeRequest
 
 	// Парсим тело запроса
 	if err := ctx.BodyParser(&exchangeRequest); err != nil {
+		h.logger.Errorf("Invalid input")
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid input",
 		})
@@ -184,6 +198,7 @@ func (h *handler) ExchangeCurrency(ctx *fiber.Ctx) error {
 	// Извлекаем ID пользователя из токена
 	userID, err := extractUserIDFromToken(ctx)
 	if err != nil {
+		h.logger.Errorf("Unauthorized")
 		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error": "Unauthorized",
 		})
@@ -200,6 +215,7 @@ func (h *handler) ExchangeCurrency(ctx *fiber.Ctx) error {
 
 	fromCurrencyBalance, ok := userBalance[exchangeRequest.FromCurrency]
 	if !ok || fromCurrencyBalance < exchangeRequest.Amount {
+		h.logger.Errorf("Insufficient funds or invalid currencies")
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Insufficient funds or invalid currencies",
 		})
