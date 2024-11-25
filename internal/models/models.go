@@ -10,6 +10,15 @@ type User struct {
 	RefreshToken []RefreshToken `json:"refreshToken" db:"refreshToken"`
 }
 
+type RefreshToken struct {
+	ID        uint64    `db:"id"`
+	UserID    uint64    `db:"user_id"`
+	Token     string    `db:"token"`
+	DeviceID  string    `db:"device_id"`
+	CreatedAt time.Time `db:"created_at"`
+	ExpiresAt time.Time `db:"expires_at"`
+}
+
 type Wallet struct {
 	ID       uint64  `json:"id" db:"id"`
 	UserID   uint64  `json:"user_id" db:"user_id"`
@@ -95,14 +104,4 @@ type RatesResponse struct {
 	USD   float64            `json:"USD"`
 	RUB   float64            `json:"RUB"`
 	EUR   float64            `json:"EUR"`
-}
-
-type RefreshToken struct {
-	ID        uint      `gorm:"primaryKey"`
-	UserID    uint64    `gorm:"not null"`
-	Token     string    `gorm:"not null"`
-	DeviceID  string    `gorm:"not null"`
-	CreatedAt time.Time `gorm:"not null"`
-	ExpiresAt time.Time `gorm:"not null"`
-	User      User      `gorm:"foreignKey:UserID"`
 }

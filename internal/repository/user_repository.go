@@ -30,38 +30,58 @@ func (r *repo) GetUserByUsername(username string) (*models.User, error) {
 }
 
 // Получение RefreshToken по userID и deviceID
-func (a *repo) GetRefreshTokenModelByID(ctx context.Context, userID uint64, deviceID string) (*models.RefreshToken, error) {
-	query := "SELECT user_id, device_id, token, expires_at FROM refresh_tokens WHERE user_id = ? AND device_id = ?"
-	row := a.db.QueryRowContext(ctx, query, userID, deviceID)
+func (r *repo) GetRefreshTokenModelByID(ctx context.Context, userID uint64, deviceID string) (*models.RefreshToken, error) {
+	query := `
+		SELECT id, user_id, device_id, token, created_at, expires_at 
+		FROM refresh_tokens 
+		WHERE user_id = $1 AND device_id = $2`
+	row := r.db.QueryRowContext(ctx, query, userID, deviceID)
 
 	var refreshToken models.RefreshToken
-	if err := row.Scan(&refreshToken.UserID, &refreshToken.DeviceID, &refreshToken.Token, &refreshToken.ExpiresAt); err != nil {
+	if err := row.Scan(
+		&refreshToken.ID,
+		&refreshToken.UserID,
+		&refreshToken.DeviceID,
+		&refreshToken.Token,
+		&refreshToken.CreatedAt,
+		&refreshToken.ExpiresAt,
+	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil // Не найдено
+			return nil, nil
 		}
-		a.logger.Error("Error fetching refresh token:", err)
+		r.logger.Error("Error fetching refresh token:", err)
 		return nil, err
 	}
 	return &refreshToken, nil
 }
 
 // Добавление нового RefreshToken
-func (a *repo) SetRefreshTokenModel(ctx context.Context, refreshToken *models.RefreshToken) error {
-	query := "INSERT INTO refresh_tokens (user_id, device_id, token, expires_at) VALUES (?, ?, ?, ?)"
-	_, err := a.db.ExecContext(ctx, query, refreshToken.UserID, refreshToken.DeviceID, refreshToken.Token, refreshToken.ExpiresAt)
+func (r *repo) SetRefreshTokenModel(ctx context.Context, refreshToken *models.RefreshToken) error {
+	query := `
+		INSERT INTO refresh_tokens (user_id, device_id, token, created_at, expires_at) 
+		VALUES ($1, $2, $3, $4, $5)`
+	_, err := r.db.ExecContext(ctx, query,
+		refreshToken.UserID,
+		refreshToken.DeviceID,
+		refreshToken.Token,
+		refreshToken.CreatedAt,
+		refreshToken.ExpiresAt,
+	)
 	if err != nil {
-		a.logger.Error("Error inserting refresh token:", err)
+		r.logger.Error("Error inserting refresh token:", err)
 		return err
 	}
 	return nil
 }
 
 // Удаление RefreshToken
-func (a *repo) DeleteRefreshTokenModel(ctx context.Context, refreshToken *models.RefreshToken) error {
-	query := "DELETE FROM refresh_tokens WHERE user_id = ? AND device_id = ?"
-	_, err := a.db.ExecContext(ctx, query, refreshToken.UserID, refreshToken.DeviceID)
+func (r *repo) DeleteRefreshTokenModel(ctx context.Context, refreshToken *models.RefreshToken) error {
+	query := `
+		DELETE FROM refresh_tokens 
+		WHERE user_id = $1 AND device_id = $2`
+	_, err := r.db.ExecContext(ctx, query, refreshToken.UserID, refreshToken.DeviceID)
 	if err != nil {
-		a.logger.Error("Error deleting refresh token:", err)
+		r.logger.Error("Error deleting refresh token:", err)
 		return err
 	}
 	return nil

@@ -1,9 +1,15 @@
 package handlers
 
 import (
+	"context"
+	"time"
+
 	"github.com/VadimBorzenkov/gw-currency-wallet/internal/models"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
+
+const RequestTimeout = 1 * time.Second
 
 // Register регистрирует нового пользователя
 // @Summary Register new user
@@ -19,12 +25,14 @@ import (
 func (h *handler) RegisterUser(ctx *fiber.Ctx) error {
 	var user models.User
 	if err := ctx.BodyParser(&user); err != nil {
+		h.logger.Errorf("Invalid input")
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid input"})
 	}
 
 	id, err := h.service.RegisterUser(&user)
 	if err != nil {
 		if err.Error() == "username already exists" {
+			h.logger.Errorf("Username already exists")
 			return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Username already exists"})
 		}
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Internal server error"})
@@ -55,18 +63,44 @@ func (h *handler) LoginUser(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid input"})
 	}
 
+	ctxWithTimeout, cancel := context.WithTimeout(context.Background(), RequestTimeout)
+	defer cancel()
+
 	user, err := h.service.AuthenticateUser(credentials.Username, credentials.Password)
 	if err != nil {
-		if err.Error() == "user not found" || err.Error() == "invalid password" {
-			return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid username or password"})
-		}
-		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Internal server error"})
+		h.logger.Error("Invalid password")
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid password"})
 	}
 
-	token, err := h.tokenManager.NewJWT(uint64(user.ID), user.Email, ctx.IP(), "tokenID")
+	deviceID := ctx.IP()
+	accessToken, err := h.service.NewJWT(user.ID, user.Email, deviceID, uuid.New().String())
 	if err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to generate token"})
+		h.logger.Error("Failed to generate access token.")
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Failed to generate access token."})
 	}
 
-	return ctx.JSON(fiber.Map{"token": token})
+	refreshToken, err := h.service.NewJWT(user.ID, user.Email, deviceID, uuid.New().String())
+	if err != nil {
+		h.logger.Error("Failed to generate refresh token.")
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Failed to generate refresh token."})
+	}
+
+	now := time.Now()
+	expire := now.Add(time.Duration(h.service.AccessTTL() * time.Minute))
+
+	refreshTokenModel := models.RefreshToken{
+		UserID:    user.ID,
+		Token:     refreshToken,
+		DeviceID:  deviceID,
+		CreatedAt: now,
+		ExpiresAt: expire,
+	}
+
+	err = h.service.CreateRefreshTokenModel(ctxWithTimeout, &refreshTokenModel)
+	if err != nil {
+		h.logger.Error("Failed to save refresh token.")
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Failed to save refresh token."})
+	}
+
+	return ctx.JSON(fiber.Map{"token": accessToken})
 }

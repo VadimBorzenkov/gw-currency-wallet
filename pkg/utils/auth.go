@@ -81,9 +81,12 @@ func (m *Manager) ParseJWT(accessToken string) (*Claims, error) {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
+		// fdfdfdf
+		log.Println(m.PublicKey)
+
 		publicKeyData, err := os.ReadFile(m.PublicKey)
 		if err != nil {
-			log.Fatalf("could not read private key file: %v", err)
+			return nil, fmt.Errorf("could not read private key file: %v", err)
 		}
 		publicKey, err := jwt.ParseRSAPublicKeyFromPEM(publicKeyData)
 		if err != nil {
