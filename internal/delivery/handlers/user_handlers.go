@@ -14,7 +14,7 @@ const RequestTimeout = 1 * time.Second
 // Register регистрирует нового пользователя
 // @Summary Register new user
 // @Description Создает нового пользователя с предоставленными данными
-// @Tags auth
+// @Tags Users
 // @Accept json
 // @Produce json
 // @Param register body models.RegisterRequest true "Registration data"
@@ -45,7 +45,7 @@ func (h *handler) RegisterUser(ctx *fiber.Ctx) error {
 }
 
 // LoginUser авторизует пользователя
-// @Summary Авторизация пользователя
+// @Summary Authorization user
 // @Description Авторизация пользователя с возвратом JWT-токена для дальнейших запросов
 // @Tags Users
 // @Accept json

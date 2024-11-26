@@ -20,7 +20,7 @@ func extractUserIDFromToken(c *fiber.Ctx) (uint64, error) {
 // GetBalance возвращает баланс пользователя.
 // @Summary Get user balance
 // @Description Получает текущий баланс пользователя.
-// @Tags wallet
+// @Tags Wallet
 // @Accept json
 // @Produce json
 // @Success 200 {object} models.BalanceResponse
@@ -56,7 +56,7 @@ func (h *handler) GetBalance(ctx *fiber.Ctx) error {
 // Deposit пополняет баланс пользователя.
 // @Summary Deposit funds to user balance
 // @Description Пополняет баланс пользователя на указанную сумму.
-// @Tags wallet
+// @Tags Wallet
 // @Accept json
 // @Produce json
 // @Param deposit body models.DepositRequest true "Deposit request"
@@ -102,7 +102,7 @@ func (h *handler) Deposit(ctx *fiber.Ctx) error {
 // Withdraw выводит средства со счета.
 // @Summary Withdraw funds from user balance
 // @Description Выводит указанную сумму со счета пользователя.
-// @Tags wallet
+// @Tags Wallet
 // @Accept json
 // @Produce json
 // @Param withdraw body models.WithdrawRequest true "Withdraw request"
@@ -148,7 +148,7 @@ func (h *handler) Withdraw(ctx *fiber.Ctx) error {
 // GetExchangeRates получает актуальные курсы валют.
 // @Summary Get exchange rates
 // @Description Получает актуальные курсы валют для различных валютных пар.
-// @Tags exchange
+// @Tags Exchange
 // @Accept json
 // @Produce json
 // @Success 200 {object} models.RatesResponse
@@ -174,7 +174,7 @@ func (h *handler) GetExchangeRates(ctx *fiber.Ctx) error {
 // ExchangeCurrency - обработка обмена валют.
 // @Summary Exchange currency
 // @Description Обменивает одну валюту на другую по актуальному курсу.
-// @Tags exchange
+// @Tags Exchange
 // @Accept json
 // @Produce json
 // @Param exchange body models.ExchangeRequest true "Exchange request"

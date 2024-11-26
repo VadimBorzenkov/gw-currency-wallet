@@ -156,7 +156,7 @@ paths:
       - BearerAuth: []
       summary: Get user balance
       tags:
-      - wallet
+      - Wallet
   /api/v1/login:
     post:
       consumes:
@@ -181,7 +181,7 @@ paths:
           description: Invalid username or password
           schema:
             $ref: '#/definitions/models.ErrorResponse'
-      summary: Авторизация пользователя
+      summary: Authorization user
       tags:
       - Users
   /api/v1/register:
@@ -213,7 +213,7 @@ paths:
             $ref: '#/definitions/models.ErrorResponse'
       summary: Register new user
       tags:
-      - auth
+      - Users
   /api/v1/wallet/deposit:
     post:
       consumes:
@@ -249,7 +249,7 @@ paths:
       - BearerAuth: []
       summary: Deposit funds to user balance
       tags:
-      - wallet
+      - Wallet
   /api/v1/wallet/exchange:
     post:
       consumes:
@@ -285,7 +285,7 @@ paths:
       - BearerAuth: []
       summary: Exchange currency
       tags:
-      - exchange
+      - Exchange
   /api/v1/wallet/rates:
     get:
       consumes:
@@ -304,7 +304,7 @@ paths:
             $ref: '#/definitions/models.ErrorResponse'
       summary: Get exchange rates
       tags:
-      - exchange
+      - Exchange
   /api/v1/wallet/withdraw:
     post:
       consumes:
@@ -340,7 +340,7 @@ paths:
       - BearerAuth: []
       summary: Withdraw funds from user balance
       tags:
-      - wallet
+      - Wallet
 securityDefinitions:
   BearerAuth:
     in: header

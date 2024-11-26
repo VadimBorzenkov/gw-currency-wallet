@@ -24,7 +24,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "wallet"
+                    "Wallet"
                 ],
                 "summary": "Get user balance",
                 "responses": {
@@ -61,7 +61,7 @@
                 "tags": [
                     "Users"
                 ],
-                "summary": "Авторизация пользователя",
+                "summary": "Authorization user",
                 "parameters": [
                     {
                         "description": "User credentials",
@@ -99,7 +99,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "auth"
+                    "Users"
                 ],
                 "summary": "Register new user",
                 "parameters": [
@@ -150,7 +150,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "wallet"
+                    "Wallet"
                 ],
                 "summary": "Deposit funds to user balance",
                 "parameters": [
@@ -207,7 +207,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "exchange"
+                    "Exchange"
                 ],
                 "summary": "Exchange currency",
                 "parameters": [
@@ -259,7 +259,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "exchange"
+                    "Exchange"
                 ],
                 "summary": "Get exchange rates",
                 "responses": {
@@ -293,7 +293,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "wallet"
+                    "Wallet"
                 ],
                 "summary": "Withdraw funds from user balance",
                 "parameters": [

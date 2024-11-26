@@ -30,7 +30,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "wallet"
+                    "Wallet"
                 ],
                 "summary": "Get user balance",
                 "responses": {
@@ -67,7 +67,7 @@ const docTemplate = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Авторизация пользователя",
+                "summary": "Authorization user",
                 "parameters": [
                     {
                         "description": "User credentials",
@@ -105,7 +105,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "auth"
+                    "Users"
                 ],
                 "summary": "Register new user",
                 "parameters": [
@@ -156,7 +156,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "wallet"
+                    "Wallet"
                 ],
                 "summary": "Deposit funds to user balance",
                 "parameters": [
@@ -213,7 +213,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "exchange"
+                    "Exchange"
                 ],
                 "summary": "Exchange currency",
                 "parameters": [
@@ -265,7 +265,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "exchange"
+                    "Exchange"
                 ],
                 "summary": "Get exchange rates",
                 "responses": {
@@ -299,7 +299,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "wallet"
+                    "Wallet"
                 ],
                 "summary": "Withdraw funds from user balance",
                 "parameters": [
